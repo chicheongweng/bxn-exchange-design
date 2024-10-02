@@ -7,7 +7,7 @@ This document outlines the design of a microservices-based, event-driven crypto 
 - Trade Service
 - Wallet Service
 - Notification Service
-- Product Service (new)
+- Portfolio Service (new)
 
 Each service is responsible for a specific domain and communicates with other services through events and REST APIs.
 
@@ -113,26 +113,26 @@ Each service is responsible for a specific domain and communicates with other se
 - Exposes REST APIs for notification management.
 - Consumes events like `OrderCreated`, `TradeExecuted`, and `WalletUpdated` to send notifications.
 
-### 6. Product Service (New)
+### 6. Portfolio Service (New)
 
 **Responsibilities:**
 
-- Manage products and track the quantity of products a user owns.
+- Manage Portfolios and track the quantity of Portfolios a user owns.
 
 **Endpoints:**
 
-- `POST /api/products`: Create a new product.
-- `GET /api/products/{id}`: Retrieve product details.
-- `GET /api/products`: Retrieve all products.
-- `PUT /api/products/{id}`: Update product details.
-- `DELETE /api/products/{id}`: Delete a product.
-- `GET /api/products/user/{userId}`: Retrieve products owned by a user.
+- `POST /api/Portfolios`: Create a new Portfolio.
+- `GET /api/Portfolios/{id}`: Retrieve Portfolio details.
+- `GET /api/Portfolios`: Retrieve all Portfolios.
+- `PUT /api/Portfolios/{id}`: Update Portfolio details.
+- `DELETE /api/Portfolios/{id}`: Delete a Portfolio.
+- `GET /api/Portfolios/user/{userId}`: Retrieve Portfolios owned by a user.
 
 **Communication:**
 
-- Exposes REST APIs for product management.
-- Consumes events like `TradeExecuted` to update product quantities.
-- Publishes events like `ProductUpdated`.
+- Exposes REST APIs for Portfolio management.
+- Consumes events like `TradeExecuted` to update Portfolio quantities.
+- Publishes events like `PortfolioUpdated`.
 
 ## Event-Driven Communication
 
@@ -158,9 +158,9 @@ The services communicate with each other using an event-driven architecture. The
 
 - `WalletUpdated`
 
-**Product Events:**
+**Portfolio Events:**
 
-- `ProductUpdated`
+- `PortfolioUpdated`
 
 ## Detailed Flows
 
@@ -191,10 +191,10 @@ The services communicate with each other using an event-driven architecture. The
 1. The Wallet Service consumes the `TradeExecuted` event and updates the user's wallet balance.
 2. The Wallet Service publishes a `WalletUpdated` event.
 
-**Update product quantities:**
+**Update Portfolio quantities:**
 
-1. The Product Service consumes the `TradeExecuted` event and updates the quantities of products owned by the user.
-2. The Product Service publishes a `ProductUpdated` event.
+1. The Portfolio Service consumes the `TradeExecuted` event and updates the quantities of Portfolios owned by the user.
+2. The Portfolio Service publishes a `PortfolioUpdated` event.
 
 **Send notifications:**
 
@@ -212,10 +212,10 @@ The services communicate with each other using an event-driven architecture. The
 1. The Wallet Service consumes the `TradeExecuted` event and updates the user's wallet balance.
 2. The Wallet Service publishes a `WalletUpdated` event.
 
-**Update product quantities:**
+**Update Portfolio quantities:**
 
-1. The Product Service consumes the `TradeExecuted` event and updates the quantities of products owned by the user.
-2. The Product Service publishes a `ProductUpdated` event.
+1. The Portfolio Service consumes the `TradeExecuted` event and updates the quantities of Portfolios owned by the user.
+2. The Portfolio Service publishes a `PortfolioUpdated` event.
 
 **Send notifications:**
 
@@ -260,26 +260,26 @@ The services communicate with each other using an event-driven architecture. The
 5. **Notification:**
     - The Notification Service consumes the `OrderCreated`, `TradeExecuted`, and `WalletUpdated` events to notify the user about the order status, trade execution, and wallet balance update.
 
-#### Example Flow 2: Product Management
+#### Example Flow 2: Portfolio Management
 
-1. **Product Creation:**
-    - An admin sends a `POST /api/products` request to the Product Service to create a new product.
-    - The Product Service creates the product and publishes a `ProductUpdated` event.
+1. **Portfolio Creation:**
+    - An admin sends a `POST /api/Portfolios` request to the Portfolio Service to create a new Portfolio.
+    - The Portfolio Service creates the Portfolio and publishes a `PortfolioUpdated` event.
 
-2. **Product Update:**
-    - The admin sends a `PUT /api/products/{id}` request to update product details.
-    - The Product Service updates the product and publishes a `ProductUpdated` event.
+2. **Portfolio Update:**
+    - The admin sends a `PUT /api/Portfolios/{id}` request to update Portfolio details.
+    - The Portfolio Service updates the Portfolio and publishes a `PortfolioUpdated` event.
 
-3. **Product Deletion:**
-    - The admin sends a `DELETE /api/products/{id}` request to delete a product.
-    - The Product Service deletes the product and publishes a `ProductUpdated` event.
+3. **Portfolio Deletion:**
+    - The admin sends a `DELETE /api/Portfolios/{id}` request to delete a Portfolio.
+    - The Portfolio Service deletes the Portfolio and publishes a `PortfolioUpdated` event.
 
-4. **Product Quantity Update:**
-    - The Product Service consumes the `TradeExecuted` event to update the quantities of products owned by the user.
-    - The Product Service publishes a `ProductUpdated` event.
+4. **Portfolio Quantity Update:**
+    - The Portfolio Service consumes the `TradeExecuted` event to update the quantities of Portfolios owned by the user.
+    - The Portfolio Service publishes a `PortfolioUpdated` event.
 
 5. **Notification:**
-    - The Notification Service consumes the `ProductUpdated` event to notify users about product updates.
+    - The Notification Service consumes the `PortfolioUpdated` event to notify users about Portfolio updates.
 
 
 6. After updating the wallet balances, the Wallet Service publishes a `WalletUpdated` event.
