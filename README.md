@@ -186,20 +186,6 @@ The services communicate with each other using an event-driven architecture. The
 1. The Trade Service consumes the `OrderCreated` event and attempts to match the order.
 2. If the order is matched fully or partially, the Trade Service publishes a `TradeExecuted` event.
 
-**Update wallet balance:**
-
-1. The Wallet Service consumes the `TradeExecuted` event and updates the user's wallet balance.
-2. The Wallet Service publishes a `WalletUpdated` event.
-
-**Update Portfolio quantities:**
-
-1. The Portfolio Service consumes the `TradeExecuted` event and updates the quantities of Portfolios owned by the user.
-2. The Portfolio Service publishes a `PortfolioUpdated` event.
-
-**Send notifications:**
-
-1. The Notification Service consumes the `OrderCreated`, `TradeExecuted`, and `WalletUpdated` events to notify the user about the order status, trade execution, and wallet balance update.
-
 ### 2. Trade Execution Flow
 
 **Order matching:**
@@ -283,9 +269,10 @@ The services communicate with each other using an event-driven architecture. The
 
 
 6. After updating the wallet balances, the Wallet Service publishes a `WalletUpdated` event.
+
 7. This event contains details about the updated wallet balances, including the user ID and the new balance.
 
-### Example Flow
+#### Example Flow 3:
 
 #### 1. Order Creation
 
