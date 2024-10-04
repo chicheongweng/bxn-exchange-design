@@ -191,6 +191,48 @@ The services communicate with each other using an event-driven architecture. The
 
 - `PortfolioUpdated`
 
+## Data Flow Diagram
+
+```mermaid
+sequenceDiagram
+    participant UserA
+    participant UserB
+    participant OrderService
+    participant TradeService
+    participant WalletService
+    participant PortfolioService
+    participant NotificationService
+
+    UserA->>OrderService: Place buy order for 10 BTC at $50,000 each
+    OrderService->>OrderService: Create order record
+    OrderService->>TradeService: Match order with sell order
+    TradeService->>OrderService: Publish TradeExecuted event
+    OrderService->>WalletService: Update wallet balances
+    WalletService->>NotificationService: Publish WalletUpdated event
+    NotificationService->>NotificationService: Notify users about wallet updates
+
+    UserB->>OrderService: Place sell order for 5 BTC at $50,000 each
+    OrderService->>OrderService: Create order record
+    OrderService->>TradeService: Match order with buy order
+    TradeService->>OrderService: Publish TradeExecuted event
+    OrderService->>WalletService: Update wallet balances
+    WalletService->>NotificationService: Publish WalletUpdated event
+    NotificationService->>NotificationService: Notify users about wallet updates
+
+    PortfolioService->>NotificationService: Publish PortfolioUpdated event
+    NotificationService->>NotificationService: Notify users about Portfolio updates
+
+    TradeService->>PortfolioService: Publish TradeExecuted event
+    PortfolioService->>PortfolioService: Update Portfolio quantities
+    PortfolioService->>NotificationService: Publish PortfolioUpdated event
+    NotificationService->>NotificationService: Notify users about Portfolio updates
+
+    WalletService->>WalletService: Update wallet balances
+    WalletService->>NotificationService: Publish WalletUpdated event
+    NotificationService->>NotificationService: Notify users about wallet updates
+
+```
+
 ## Detailed Flows
 
 ### 1. Order Placement Flow
