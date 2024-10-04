@@ -134,6 +134,33 @@ Each service is responsible for a specific domain and communicates with other se
 - Consumes events like `TradeExecuted` to update Portfolio quantities.
 - Publishes events like `PortfolioUpdated`.
 
+Sure, let's define the data classes for all the events in your `README.md` file. Here's how you might define them in Kotlin:
+
+## Event Data Classes
+
+In Kotlin, we define the events as data classes. Here are the data classes for all the events:
+
+```kotlin
+// User Events
+data class UserCreatedEvent(val userId: String, val userName: String)
+data class UserUpdatedEvent(val userId: String, val userName: String)
+data class UserDeletedEvent(val userId: String)
+
+// Order Events
+data class OrderCreatedEvent(val orderId: String, val userId: String, val product: String, val quantity: Int, val price: Double)
+data class OrderUpdatedEvent(val orderId: String, val userId: String, val product: String, val quantity: Int, val price: Double)
+data class OrderCancelledEvent(val orderId: String, val userId: String)
+
+// Trade Events
+data class TradeExecutedEvent(val tradeId: String, val buyOrderId: String, val sellOrderId: String, val product: String, val quantity: Int, val price: Double)
+
+// Wallet Events
+data class WalletUpdatedEvent(val walletId: String, val userId: String, val balance: Double)
+
+// Portfolio Events
+data class PortfolioUpdatedEvent(val portfolioId: String, val userId: String, val product: String, val quantity: Int)
+```
+
 ## Event-Driven Communication
 
 The services communicate with each other using an event-driven architecture. The following events are used:
