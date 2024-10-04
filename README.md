@@ -11,6 +11,8 @@ This document outlines the design of a microservices-based, event-driven crypto 
 
 Each service is responsible for a specific domain and communicates with other services through events and REST APIs.
 
+If you are interested in obtaining a copy of the source code or evaluate the performance or our platform, please reach out to me on LinkedIn.
+
 ## Services
 
 ### 1. User Service
