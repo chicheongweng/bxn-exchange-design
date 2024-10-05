@@ -6,8 +6,8 @@ This document outlines the design of a microservices-based, event-driven crypto 
 - Order Service
 - Trade Service
 - Wallet Service
+- Portfolio Service
 - Notification Service
-- Portfolio Service (new)
 
 Each service is responsible for a specific domain and communicates with other services through events and REST APIs.
 
