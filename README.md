@@ -149,15 +149,15 @@ data class UserUpdatedEvent(val userId: String, val userName: String)
 data class UserDeletedEvent(val userId: String)
 
 // Order Events
-data class OrderCreatedEvent(val orderId: String, val userId: String, val product: String, val quantity: Double, val price: Double, val status: String, val condition: String, val type: String)
-data class OrderUpdatedEvent(val orderId: String, val userId: String, val product: String, val quantity: Double, val price: Double, val status: String, val condition: String, val type: String)
+data class OrderCreatedEvent(val orderId: String, val userId: String, val product: String, val quantity: BigDecimal, val price: BigDecimal, val status: String, val condition: String, val type: String)
+data class OrderUpdatedEvent(val orderId: String, val userId: String, val product: String, val quantity: BigDecimal, val price: BigDecimal, val status: String, val condition: String, val type: String)
 data class OrderCancelledEvent(val orderId: String, val userId: String)
 
 // Trade Events
-data class TradeExecutedEvent(val tradeId: String, val buyOrderId: String, val sellOrderId: String, val product: String, val quantity: Double, var tradeDate: LocalDateTime, val price: Double)
+data class TradeExecutedEvent(val tradeId: String, val buyOrderId: String, val sellOrderId: String, val product: String, val quantity: BigDecimal, var tradeDate: LocalDateTime, val price: BigDecimal)
 
 // Wallet Events
-data class WalletUpdatedEvent(val walletId: String, val userId: String, val balance: Double)
+data class WalletUpdatedEvent(val walletId: String, val userId: String, val balance: BigDecimal)
 
 // Portfolio Events
 data class PortfolioUpdatedEvent(val portfolioId: String, val userId: String, val product: String, val quantity: Int)
