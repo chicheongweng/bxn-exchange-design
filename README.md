@@ -5,7 +5,7 @@ This document outlines the design of a microservices-based, event-driven crypto 
 - User Service
 - Order Service
 - Trade Service
-- Wallet Service
+- Ledger Service
 - Portfolio Service
 - Notification Service
 
@@ -77,7 +77,7 @@ If you are interested in obtaining a copy of the source code or evaluate the per
 - Consumes events like `OrderCreated` to execute trades.
 - Publishes events like `TradeExecuted`.
 
-### 4. Wallet Service
+### 4. Ledger Service
 
 **Responsibilities:**
 
@@ -91,6 +91,8 @@ If you are interested in obtaining a copy of the source code or evaluate the per
 - `GET /api/wallets`: Retrieve all wallets.
 - `PUT /api/wallets/{id}`: Update wallet balance.
 - `DELETE /api/wallets/{id}`: Delete a wallet.
+- `POST /api/wallets/{id}/debit`: Debit a wallet.
+- `POST /api/wallets/{id}/credit`: Credit a wallet.
 
 **Communication:**
 
@@ -207,7 +209,7 @@ sequenceDiagram
     OrderService->>OrderService: Create order record
     OrderService->>TradeService: Match order with sell order
     TradeService->>OrderService: Publish TradeExecuted event
-    OrderService->>WalletService: Update wallet balances
+    OrderService->>LedgerService: Update wallet balances
     WalletService->>NotificationService: Publish WalletUpdated event
     NotificationService->>NotificationService: Notify users about wallet updates
 
@@ -240,11 +242,11 @@ sequenceDiagram
 **User places an order:**
 
 1. The user sends a request to the Order Service to place an order.
-2. The Order Service validates the order and checks the user's balance by querying the Wallet Service.
+2. The Order Service validates the order and checks the user's balance by querying the Ledger Service.
 
 **Check user balance:**
 
-1. The Order Service sends a request to the Wallet Service to check if the user has sufficient balance.
+1. The Order Service sends a request to the Ledger Service to check if the user has sufficient balance.
 2. If the user has sufficient balance, the Order Service proceeds to create the order.
 3. If the user does not have sufficient balance, the Order Service returns an error response.
 
@@ -266,8 +268,8 @@ sequenceDiagram
 
 **Update wallet balance:**
 
-1. The Wallet Service consumes the `TradeExecuted` event and updates the user's wallet balance.
-2. The Wallet Service publishes a `WalletUpdated` event.
+1. The Ledger Service consumes the `TradeExecuted` event and updates the user's wallet balance.
+2. The Ledger Service publishes a `WalletUpdated` event.
 
 **Update Portfolio quantities:**
 
@@ -303,7 +305,7 @@ sequenceDiagram
 
 2. **Order Placement:**
     - The user sends a `POST /api/orders` request to the Order Service to place a new order.
-    - The Order Service validates the order and checks the user's balance by querying the Wallet Service.
+    - The Order Service validates the order and checks the user's balance by querying the Ledger Service.
     - If the balance is sufficient, the Order Service creates the order and publishes an `OrderCreated` event.
 
 3. **Order Processing:**
@@ -311,8 +313,8 @@ sequenceDiagram
     - If a match is found, the Trade Service executes the trade and publishes a `TradeExecuted` event.
 
 4. **Wallet Update:**
-    - The Wallet Service consumes the `TradeExecuted` event and updates the user's wallet balance.
-    - The Wallet Service publishes a `WalletUpdated` event.
+    - The Ledger Service consumes the `TradeExecuted` event and updates the user's wallet balance.
+    - The Ledger Service publishes a `WalletUpdated` event.
 
 5. **Notification:**
     - The Notification Service consumes the `OrderCreated`, `TradeExecuted`, and `WalletUpdated` events to notify the user about the order status, trade execution, and wallet balance update.
@@ -339,7 +341,7 @@ sequenceDiagram
     - The Notification Service consumes the `PortfolioUpdated` event to notify users about Portfolio updates.
 
 
-6. After updating the wallet balances, the Wallet Service publishes a `WalletUpdated` event.
+6. After updating the wallet balances, the Ledger Service publishes a `WalletUpdated` event.
 
 7. This event contains details about the updated wallet balances, including the user ID and the new balance.
 
@@ -413,7 +415,7 @@ sequenceDiagram
 
 #### 3. Updating Wallets
 
-- The Wallet Service consumes the TradeExecuted event and updates the wallets of User A and User B.
+- The Ledger Service consumes the TradeExecuted event and updates the wallets of User A and User B.
 - User A's Wallet:
 - User A's wallet balance is decreased by the total cost of the trade (5 BTC * $50,000 = $250,000).
 - User A's wallet balance is updated
@@ -438,7 +440,7 @@ sequenceDiagram
     }
     ```
 
-- The Wallet Service publishes WalletUpdated events for both users:
+- The Ledger Service publishes WalletUpdated events for both users:
   ```json
   {
     "userId": "userA",
