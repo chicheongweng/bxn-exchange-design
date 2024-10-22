@@ -6,7 +6,7 @@ This document outlines the design of a microservices-based, event-driven crypto 
 - Order Service
 - Trade Service
 - Ledger Service
-- Portfolio Service
+- position Service
 - Notification Service
 
 Each service is responsible for a specific domain and communicates with other services through events and REST APIs.
@@ -117,26 +117,26 @@ If you are interested in obtaining a copy of the source code or evaluate the per
 - Exposes REST APIs for notification management.
 - Consumes events like `OrderCreated`, `TradeExecuted`, and `WalletUpdated` to send notifications.
 
-### 6. Portfolio Service (New)
+### 6. position Service (New)
 
 **Responsibilities:**
 
-- Manage Portfolios and track the quantity of Portfolios a user owns.
+- Manage positions and track the quantity of positions a user owns.
 
 **Endpoints:**
 
-- `POST /api/Portfolios`: Create a new Portfolio.
-- `GET /api/Portfolios/{id}`: Retrieve Portfolio details.
-- `GET /api/Portfolios`: Retrieve all Portfolios.
-- `PUT /api/Portfolios/{id}`: Update Portfolio details.
-- `DELETE /api/Portfolios/{id}`: Delete a Portfolio.
-- `GET /api/Portfolios/user/{userId}`: Retrieve Portfolios owned by a user.
+- `POST /api/positions`: Create a new position.
+- `GET /api/positions/{id}`: Retrieve position details.
+- `GET /api/positions`: Retrieve all positions.
+- `PUT /api/positions/{id}`: Update position details.
+- `DELETE /api/positions/{id}`: Delete a position.
+- `GET /api/positions/user/{userId}`: Retrieve positions owned by a user.
 
 **Communication:**
 
-- Exposes REST APIs for Portfolio management.
-- Consumes events like `TradeExecuted` to update Portfolio quantities.
-- Publishes events like `PortfolioUpdated`.
+- Exposes REST APIs for position management.
+- Consumes events like `TradeExecuted` to update position quantities.
+- Publishes events like `positionUpdated`.
 
 Sure, let's define the data classes for all the events in your `README.md` file. Here's how you might define them in Kotlin:
 
@@ -161,8 +161,8 @@ data class TradeExecutedEvent(val tradeId: String, val buyOrderId: String, val s
 // Wallet Events
 data class WalletUpdatedEvent(val walletId: String, val userId: String, val balance: BigDecimal)
 
-// Portfolio Events
-data class PortfolioUpdatedEvent(val portfolioId: String, val userId: String, val product: String, val quantity: Int)
+// position Events
+data class positionUpdatedEvent(val positionId: String, val userId: String, val product: String, val quantity: Int)
 ```
 
 ## Event-Driven Communication
@@ -189,9 +189,9 @@ The services communicate with each other using an event-driven architecture. The
 
 - `WalletUpdated`
 
-**Portfolio Events:**
+**position Events:**
 
-- `PortfolioUpdated`
+- `positionUpdated`
 
 ## Data Flow Diagram
 
@@ -202,7 +202,7 @@ sequenceDiagram
     participant OrderService
     participant TradeService
     participant WalletService
-    participant PortfolioService
+    participant positionService
     participant NotificationService
 
     UserA->>OrderService: Place buy order for 10 BTC at $50,000 each
@@ -221,13 +221,13 @@ sequenceDiagram
     WalletService->>NotificationService: Publish WalletUpdated event
     NotificationService->>NotificationService: Notify users about wallet updates
 
-    PortfolioService->>NotificationService: Publish PortfolioUpdated event
-    NotificationService->>NotificationService: Notify users about Portfolio updates
+    positionService->>NotificationService: Publish positionUpdated event
+    NotificationService->>NotificationService: Notify users about position updates
 
-    TradeService->>PortfolioService: Publish TradeExecuted event
-    PortfolioService->>PortfolioService: Update Portfolio quantities
-    PortfolioService->>NotificationService: Publish PortfolioUpdated event
-    NotificationService->>NotificationService: Notify users about Portfolio updates
+    TradeService->>positionService: Publish TradeExecuted event
+    positionService->>positionService: Update position quantities
+    positionService->>NotificationService: Publish positionUpdated event
+    NotificationService->>NotificationService: Notify users about position updates
 
     WalletService->>WalletService: Update wallet balances
     WalletService->>NotificationService: Publish WalletUpdated event
@@ -271,10 +271,10 @@ sequenceDiagram
 1. The Ledger Service consumes the `TradeExecuted` event and updates the user's wallet balance.
 2. The Ledger Service publishes a `WalletUpdated` event.
 
-**Update Portfolio quantities:**
+**Update position quantities:**
 
-1. The Portfolio Service consumes the `TradeExecuted` event and updates the quantities of Portfolios owned by the user.
-2. The Portfolio Service publishes a `PortfolioUpdated` event.
+1. The position Service consumes the `TradeExecuted` event and updates the quantities of positions owned by the user.
+2. The position Service publishes a `positionUpdated` event.
 
 **Send notifications:**
 
@@ -319,26 +319,26 @@ sequenceDiagram
 5. **Notification:**
     - The Notification Service consumes the `OrderCreated`, `TradeExecuted`, and `WalletUpdated` events to notify the user about the order status, trade execution, and wallet balance update.
 
-#### Example Flow 2: Portfolio Management
+#### Example Flow 2: position Management
 
-1. **Portfolio Creation:**
-    - An admin sends a `POST /api/Portfolios` request to the Portfolio Service to create a new Portfolio.
-    - The Portfolio Service creates the Portfolio and publishes a `PortfolioUpdated` event.
+1. **position Creation:**
+    - An admin sends a `POST /api/positions` request to the position Service to create a new position.
+    - The position Service creates the position and publishes a `positionUpdated` event.
 
-2. **Portfolio Update:**
-    - The admin sends a `PUT /api/Portfolios/{id}` request to update Portfolio details.
-    - The Portfolio Service updates the Portfolio and publishes a `PortfolioUpdated` event.
+2. **position Update:**
+    - The admin sends a `PUT /api/positions/{id}` request to update position details.
+    - The position Service updates the position and publishes a `positionUpdated` event.
 
-3. **Portfolio Deletion:**
-    - The admin sends a `DELETE /api/Portfolios/{id}` request to delete a Portfolio.
-    - The Portfolio Service deletes the Portfolio and publishes a `PortfolioUpdated` event.
+3. **position Deletion:**
+    - The admin sends a `DELETE /api/positions/{id}` request to delete a position.
+    - The position Service deletes the position and publishes a `positionUpdated` event.
 
-4. **Portfolio Quantity Update:**
-    - The Portfolio Service consumes the `TradeExecuted` event to update the quantities of Portfolios owned by the user.
-    - The Portfolio Service publishes a `PortfolioUpdated` event.
+4. **position Quantity Update:**
+    - The position Service consumes the `TradeExecuted` event to update the quantities of positions owned by the user.
+    - The position Service publishes a `positionUpdated` event.
 
 5. **Notification:**
-    - The Notification Service consumes the `PortfolioUpdated` event to notify users about Portfolio updates.
+    - The Notification Service consumes the `positionUpdated` event to notify users about position updates.
 
 
 6. After updating the wallet balances, the Ledger Service publishes a `WalletUpdated` event.
