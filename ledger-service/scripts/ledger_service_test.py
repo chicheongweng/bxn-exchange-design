@@ -5,8 +5,9 @@ import argparse
 import uuid
 import logging
 import os
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 import time
+from decimal import getcontext
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -20,7 +21,7 @@ parser.add_argument("-w", "--num_wallets", type=int, default=100)
 parser.add_argument("-b", "--initial_balance", type=float, default=1000.0)
 parser.add_argument("-n", "--num_iters", type=int, default=1000)
 parser.add_argument("-s", "--server", type=str, default='vm', choices=['vm', 'local'])
-
+parser.add_argument("-r", "--random_debit", action='store_true', help="Use random debit amount between 1.0 and 10.0")
 args = parser.parse_args()
 
 # Get the parameters from the arguments
@@ -29,6 +30,7 @@ num_wallets = args.num_wallets
 initial_balance = args.initial_balance
 num_iters = args.num_iters
 server = args.server
+random_debit = args.random_debit
 
 if server == 'vm':
     base_url = 'https://api-vm.bxn.world/api/ledger-service'
@@ -71,16 +73,20 @@ total_aborted_connections = 0
 # Create a thread-local storage object
 thread_local = threading.local()
 
-# Define the function to be run in each thread
+# Set the debit amount
+if random_debit:
+    amount = Decimal(random.uniform(1.0, 10.0)).quantize(Decimal('0.00001'), rounding=ROUND_HALF_UP)
+else:
+    amount = Decimal(10.0).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+json_data = {"amount": str(amount)}
+print(f"json_data: {json_data}")  # Print the json_data to check the amount
+
 def run_thread():
     thread_local.successful_debits = 0
     thread_local.failed_debits = 0
     thread_local.successful_credits = 0
     thread_local.failed_credits = 0
     thread_local.aborted_connections = 0
-
-    amount = Decimal(10.0)
-    json_data = {"amount": str(amount)}
 
     for _ in range(num_iters):
         # Pick two different wallets randomly
@@ -164,15 +170,23 @@ logging.info(f"Successful credits: {total_successful_credits}")
 logging.info(f"Retried credits: {total_failed_credits}")
 logging.info(f"Aborted connections: {total_aborted_connections}")
 
+# Set the precision for Decimal operations
+getcontext().prec = 28
+
 # Sum the balances of all wallets
-final_total_balance = 0
+final_total_balance = Decimal(0)
 for wallet_id in wallet_ids:
     try:
         response = requests.get(f"{base_url}/wallets/{wallet_id}")
         response.raise_for_status()
-        final_total_balance += Decimal(response.json()['balance'])
+        balance_str = response.json()['balance']
+        print(f"response: {balance_str}")  # Print the balance to check the amount
+        final_total_balance += Decimal(balance_str)
     except requests.exceptions.RequestException as e:
         logging.error(f"Failed to get wallet balance: {e}")
+
+# Quantize the final total balance to the desired precision
+final_total_balance = final_total_balance.quantize(Decimal('0.00001'), rounding=ROUND_HALF_UP)
 
 # Print out the final balance
 logging.info(f"Final total balance: {final_total_balance}")
