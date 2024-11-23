@@ -1,7 +1,12 @@
 openapi: 3.0.0
 info:
-  title: Wallet Service
+  title: Position Service API
   version: 1.0.0
+  description: API for managing user Positions in the bxn-exchange platform.
+servers:
+  - url: http://localhost:18084
+    description: Local server
+
 paths:
   /wallets:
     get:
